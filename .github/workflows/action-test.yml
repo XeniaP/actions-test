@@ -34,7 +34,7 @@ jobs:
               TMAS_API_KEY: ${{ secrets.TMAS_API_KEY }}
               REGION: us-east-1
               # Optional
-              SBOM: true # Saves SBOM to SBOM.json so you can export it as an artifact later.
+              SBOM: true # Saves  SBOM to SBOM.json so you can export it as an artifact later.
               IMAGE: marbsangr/django-app:45 # The image need to be public or the pipeline need to have access to the private image of choice.
               # For each threshold below, select the maximum number of vulnerabilities that are acceptable.
               MAX_TOTAL: 1000

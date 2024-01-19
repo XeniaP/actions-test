@@ -1,4 +1,4 @@
-# Template para poder escanear la imagen del contenedor con TMAS
+# Template para poder escanear la imagen del contenedor con TMAS +
 
 name: Build Docker Image
 

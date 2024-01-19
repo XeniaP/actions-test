@@ -32,4 +32,4 @@ jobs:
 
     - name: Push to Docker Hub
       run: |
-        docker push marbsangr/docker_test_tmas:latest
+        docker push marbsangr/action-test:latest

@@ -3,7 +3,7 @@ name: Build Docker Image
 on:
   push:
     branches:
-      - main  # ajusta esto segun la rama que desees
+      - main  # ajusta esto segun la rama que desees 
 
 jobs:
   build:

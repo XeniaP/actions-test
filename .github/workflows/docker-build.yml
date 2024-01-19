@@ -20,7 +20,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t marbsangr/docker_test_tmas:latest .
+        docker build -t action-test/Dockerfile:latest .
       env:
         DOCKER_BUILDKIT: 1
 

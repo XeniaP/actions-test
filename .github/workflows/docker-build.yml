@@ -5,41 +5,41 @@ name: Build Docker Image
 on:
   push:
     branches:
-      - main  # ajusta esto según la rama que desees
+      - main  # ajusta esto segun la rama que desees
 
 jobs:
-  BuildPushImage:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up Docker
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
+    - name: Set up Docker
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
 
-      - name: Build Docker image
-        run: |
-          docker build -t marbsangr/action-test:latest .
-        env:
-          DOCKER_BUILDKIT: 1
+    - name: Build Docker image
+      run: |
+        docker build -t marbsangr/action-test:latest .
+      env:
+        DOCKER_BUILDKIT: 1
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub
-        run: |
-          docker push marbsangr/action-test:latest
+    - name: Push to Docker Hub
+      run: |
+        docker push marbsangr/action-test:latest
 
   TrendMicroArtifactScan:
     runs-on: ubuntu-latest
     environment: DockerRegistry
-    needs: [BuildPushImage]
+    needs: [build]
     steps:
       - name: Vision One Container Security Scan Action
         uses: trendmicro/tmas-scan-action@version@1.0.10

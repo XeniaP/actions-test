@@ -5,7 +5,8 @@ FROM nginx:latest
 LABEL maintainer="tumarulog@gmail.com"
 
 # Copia archivos locales al sistema de archivos de la imagen
-COPY index.html /usr/share/nginx/html/
+#COPY index.html /usr/share/nginx/html/
+COPY index.html /home/ubuntu/actions-test
 
 # Puerto en el que escuchará el servidor Nginx
 EXPOSE 80

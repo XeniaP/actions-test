@@ -1,0 +1,50 @@
+pipeline {
+    environment {
+        registry = "marbsangr/action-test"
+        registryCredential = 'dockerhub_id'
+        dockerImage = ''
+    }
+    agent any
+    stages {
+        stage('First Clean') {
+            steps {
+                sh "rm -rf ./actions-test"
+            }
+        }
+        stage('Cloning our Git') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/marbsangr/actions-test"
+                }
+            }
+        }
+        stage('Building our image') {
+            steps {
+                script {
+                    // Ubicación del Dockerfile en el repositorio clonado
+                    def dockerfilePath = "actions-test/Dockerfile"
+                    
+                    // Construir la imagen Docker utilizando el Dockerfile del repositorio clonado
+                    dockerImage = docker.build("${registry}:${BUILD_NUMBER}", "-f ${dockerfilePath} .")
+                }
+            }
+        }
+        stage('Deploy our image') {
+            steps {
+                script {
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+        stage('Cleaning up') {
+            steps {
+                script {
+                    // Limpiar la imagen construida localmente
+                    sh "docker rmi ${registry}:${BUILD_NUMBER}"
+                }
+            }
+        }
+    }
+}

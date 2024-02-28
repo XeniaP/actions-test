@@ -8,7 +8,7 @@ payload = {}
 
 headers = { 
     'api-version': 'v1',
-    'Authorization': 'ApiKey tmc12cmwoXL8F7J6Z4QTr8TC7GqGulc:23oVt3XCadMVnD6FfrJ4N3e4BhheKn8PzF8a3Vf7i719ADSsUEyKKVqebtikkZ5MBR' 
+    'Authorization': 'ApiKey <Enter_API_KEY>' 
     }
 
 response = requests.request("GET", url, headers=headers, data=payload).json()

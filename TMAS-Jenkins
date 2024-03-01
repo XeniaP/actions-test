@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+    
+    environment {
+        AWS_ACCOUNT_ID = "*"  // Reemplaza * con tu ID de cuenta de AWS
+        AWS_DEFAULT_REGION = "us-east-1"
+        IMAGE_REPO_NAME = "*" //Reemplaza * por el nombre del repositorio de imágenes en AWS
+        IMAGE_TAG = "*" //Reemplaza * por el nombre de la imagen
+        REPOSITORY_URI = "*" //Reemplaza por el URI del repositorio de ECR
+        TMAS_HOME = "$WORKSPACE/tmas"
+        TMAS_API_KEY = credentials('TMAS_API_KEY')
+    }
+    
+    stages {
+        stage('Clean Up') {
+            steps {
+                sh "echo $WORKSPACE/tmas"
+                sh "rm -rf $WORKSPACE/tmas"
+                sh "docker rmi ${REPOSITORY_URI}:${IMAGE_TAG}" // Eliminar la imagen local antes de construir una nueva
+            }
+        }
+        
+        stage('Logging into AWS ECR') {
+            steps {
+                script {
+                    // Loguearse en AWS ECR
+                    sh """aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"""
+                }
+            }
+        }
+        
+        stage('Cloning Git') {
+            steps {
+                // Clonar repositorio de Git
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/*.git']]]) //Reemplazar * por URL de GIT
+            }
+        }
+  
+        stage('Building image') {
+            steps {
+                script {
+                    // Construir dockerImage
+                    dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+        
+        stage('Install TMAS') {
+            steps {
+                // Crear el directorio de instalación de TMAS
+                sh "mkdir -p $TMAS_HOME"
+                
+                // Descargar y descomprimir TMAS en el directorio de instalación
+                sh "curl -L https://cli.artifactscan.cloudone.trendmicro.com/tmas-cli/latest/tmas-cli_Linux_x86_64.tar.gz | tar xz -C $TMAS_HOME"
+            }
+        }
+        
+        stage('Scan with TMAS') {
+            steps {
+                // Ejecutar el escaneo con TMAS y redirigir la salida a un archivo JSON
+                sh "$TMAS_HOME/tmas scan registry:${REPOSITORY_URI}:${IMAGE_TAG} --region us-1 >> ${WORKSPACE}/scan_result.json"
+            }    
+        }
+   
+        stage('Pushing to ECR') {
+            steps {  
+                script {
+                    // Tag y push de la imagen hacia el registro de ECR.
+                    sh """docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"""
+                    sh """docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"""
+                }
+            }
+        }
+    }
+}

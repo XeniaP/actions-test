@@ -29,8 +29,7 @@ def getVulnerabilities():
                 append_data.append(df)
             else:
                 print("Completed!, Vulnerabilities not found!")
-        except Exception as e:
-            print(e)
+        except Exception:
             return append_data
     return append_data
 
@@ -52,7 +51,6 @@ def initialConfig():
                 doc = yaml.load(file, Loader=yaml.FullLoader)
                 config.set_apikey(doc["API_KEY"])
                 config.set_region(doc["REGION"])
-            print(config.get_region(), " , ", config.get_apikey())
             toExcel(getVulnerabilities())
         else:
             print("Please provide the valid configuration file path, the file must be called config.yml")
